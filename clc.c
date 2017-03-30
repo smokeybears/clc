@@ -13,6 +13,7 @@ int main(int argvc, char* argv[]) {
 	FILE* fIncludes = fopen("/tmp/clcincludes.c", "w+");
 	FILE* fDefs = fopen("/tmp/clcdefinitions.c", "w+");
 	FILE* fprimary = fopen("/tmp/clcrepl.c","w+");
+	FILE* ferrcheck = fopen("/tmp/clcerrcheck.c", "w+");
 	int writestatus = fwrite(defaultMain, strlen(defaultMain), 1, fprimary);
 
 	char cB, lastChar;
@@ -21,7 +22,7 @@ int main(int argvc, char* argv[]) {
 	int isDefs = 0, isInclude = 0;
 	while(cB != EOF) {
 		fseek(fprimary, -1, SEEK_END);
-		printf(":>");
+		printf("\n:>");
 		while((cB = fgetc(stdin)) != '\n' || lastChar == '\\') {
 			lastChar = cB;  
 			if (cB == '#'){
@@ -45,9 +46,17 @@ int main(int argvc, char* argv[]) {
 				fwrite(&cB, 1, 1, fprimary);
 			}
 		}
+		if (isDefs) {
+			fwrite("\n", 1, 1, fDefs);
+		}
+		if (isInclude){
+			fwrite("\n", 1, 1, fIncludes); 	
+		}
+		if (!isInclude && !isDefs){
+			fwrite("}", 1, 1, fprimary);
+		}	
 		isDefs = 0;
 		isInclude = 0;
-		fwrite("}", 1, 1, fprimary);
 		// clean up and send to disk	
 		fflush(fprimary); // flush in file stream
 		fflush(fDefs); // flush in file stream
@@ -63,7 +72,7 @@ int main(int argvc, char* argv[]) {
 		}	
 		executeChild = fork();
 		if (executeChild == 0) {
-			int returnstatus = execl("/tmp/clcrepl.out", "/tmp/clcrepl.out", (char *) 1);
+			int returnstatus = execl("/tmp/clcrepl.out", "/tmp/clcrepl.out", (char *) 0);
 			printf("in child 2\n");
 			//execl("/bin/echo", "/bin/echo", "he", (char *) 0);
 			perror("status: ");
@@ -82,4 +91,3 @@ int main(int argvc, char* argv[]) {
 	// if errors display to user and don't write 
 	// if line is has assingment automaticully display assigment
 	// if no errors write to file and execute
-	// 
