@@ -36,16 +36,12 @@ int main(int argvc, char* argv[]) {
 				}
 				if (!isDefs && !isInclude) {printf("huston we have a problem"); abort();}
 			}
-			if (isInclude){
-				fwrite(&cB, 1, 1, fIncludes);
-			}
-			if (isDefs) {
-				fwrite(&cB, 1, 1, fDefs);
-			}
-			if (!isInclude && !isDefs){
-				fwrite(&cB, 1, 1, fprimary);
-			}
+			fwrite(&cb, 1, 1, ferrcheck)
 		}
+		
+		
+		int status = execl("/usr/bin/clang", "/usr/bin/clang", "/tmp/clcerrcheck.c", "-o", "/tmp/clcrepl.out", (char *) 0);
+		if (status != 1 {}
 		if (isDefs) {
 			fwrite("\n", 1, 1, fDefs);
 		}
@@ -57,12 +53,11 @@ int main(int argvc, char* argv[]) {
 		}	
 		isDefs = 0;
 		isInclude = 0;
-		// clean up and send to disk	
-		fflush(fprimary); // flush in file stream
-		fflush(fDefs); // flush in file stream
-		fflush(fIncludes); // flush in file stream
+		fflush(fprimary); 
+		fflush(fDefs);
+		fflush(fIncludes);
 		fflush(stdin);
-		//fsync(fileno(fprimary)); // send file to disk
+		//fsync(fileno(fprimary)); // send file to disk uncomment if not writting to /tmp
 		compileChild = fork();
 		if (compileChild == 0) {
 			int status = execl("/usr/bin/clang", "/usr/bin/clang", "/tmp/clcrepl.c", "-o", "/tmp/clcrepl.out", (char *) 0);
@@ -73,9 +68,6 @@ int main(int argvc, char* argv[]) {
 		executeChild = fork();
 		if (executeChild == 0) {
 			int returnstatus = execl("/tmp/clcrepl.out", "/tmp/clcrepl.out", (char *) 0);
-			printf("in child 2\n");
-			//execl("/bin/echo", "/bin/echo", "he", (char *) 0);
-			perror("status: ");
 			return 1;
 		} else {
 			wait(&executeStatus);	
@@ -86,8 +78,3 @@ int main(int argvc, char* argv[]) {
 	close(fileno(fIncludes));
 	return 0;
 }
-// grab input line
-	// test if line has errors with clang
-	// if errors display to user and don't write 
-	// if line is has assingment automaticully display assigment
-	// if no errors write to file and execute
